@@ -1,20 +1,20 @@
 #pragma once
 
-void allocate_2d_array(__half*& u, __half*& v, __half*& u_prev, __half*& v_prev, __half*& p, __half*& p_prev, __half*& D_x, __half*& D_y, __half*& D_xx, __half*& D_yy, int Nx, int Ny)
+void allocate_2d_array(float*& u, float*& v, float*& u_prev, float*& v_prev, float*& p, float*& p_prev, float*& D_x, float*& D_y, float*& D_xx, float*& D_yy, int Nx, int Ny)
 {
-    u = new __half[Nx * Ny];
-    v = new __half[Nx * Ny];
-    u_prev = new __half[Nx * Ny];
-    v_prev = new __half[Nx * Ny];
-    p = new __half[Nx * Ny];
-    p_prev = new __half[Nx * Ny];
-    D_x = new __half[Nx * Ny];
-    D_y = new __half[Nx * Ny];
-    D_xx = new __half[Nx * Ny];
-    D_yy = new __half[Nx * Ny];
+    u = new float[Nx * Ny];
+    v = new float[Nx * Ny];
+    u_prev = new float[Nx * Ny];
+    v_prev = new float[Nx * Ny];
+    p = new float[Nx * Ny];
+    p_prev = new float[Nx * Ny];
+    D_x = new float[Nx * Ny];
+    D_y = new float[Nx * Ny];
+    D_xx = new float[Nx * Ny];
+    D_yy = new float[Nx * Ny];
 }
 
-void free_2d_array(__half* u, __half* v, __half* u_prev, __half* v_prev, __half* p, __half*& p_prev, __half*& D_x, __half*& D_y, __half*& D_xx, __half*& D_yy)
+void free_2d_array(float* u, float* v, float* u_prev, float* v_prev, float* p, float*& p_prev, float*& D_x, float*& D_y, float*& D_xx, float*& D_yy)
 {
     delete[] u;
     delete[] v;

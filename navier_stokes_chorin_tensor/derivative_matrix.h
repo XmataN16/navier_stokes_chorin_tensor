@@ -1,24 +1,54 @@
 #pragma once
 
-// Функция для создания разностной матрицы первого порядка
-void createFirstDerivativeMatrix(__half* D, int size, __half h)
+void createFirstDerivativeMatrix(float* D_x, int Nx, float h)
 {
-    memset(D, 0, size * size * sizeof(__half));
-    for (int i = 0; i < size; i++)
+    memset(D_x, 0, Nx * Nx * sizeof(float));
+
+    float coeff = 1.0f / (2.0f * h);
+
+    // Заполняем массив по заданному шаблону
+    for (int i = 0; i < Nx; ++i) 
     {
-        D[i * size + (i - 1)] = __float2half(- 1.0f) / (__float2half(2.0f) * h);
-        D[i * size + (i + 1)] = __float2half(1.0f) / (__float2half(2.0f) * h);
+        for (int j = 0; j < Nx; ++j) 
+        {
+            int index = i * Nx + j; // индекс в одномерном массиве
+
+            if (i == j + 1 and j != 0 and j != Nx - 1) 
+            {
+                D_x[index] = coeff;  // ниже главной диагонали
+            }
+            else if (i == j - 1 and j != 0 and j != Nx - 1)
+            {
+                D_x[index] = -coeff;   // выше главной диагонали
+            }
+        }
     }
 }
 
 // Функция для создания разностной матрицы второго порядка (Лапласиан)
-void createSecondDerivativeMatrix(__half* D, int size, __half h)
+void createSecondDerivativeMatrix(float* D, int Nx, float h)
 {
-    memset(D, 0, size * size * sizeof(__half));
-    for (int i = 0; i < size; i++)
+    memset(D, 0.0f, Nx * Nx * sizeof(float));
+
+    float coeff = 1.0f / (h * h);
+    float coeff2 = -2.0f / (h * h);
+
+    // Заполняем массив по заданному шаблону
+    for (int i = 0; i < Nx; ++i)
     {
-        D[i * size + i] = __float2half(-2.0f) / (h * h);
-        D[i * size + (i - 1)] = __float2half(1.0f) / (h * h);
-        D[i * size + (i + 1)] = __float2half(1.0f) / (h * h);
+        for (int j = 0; j < Nx; ++j)
+        {
+            int index = i * Nx + j; // индекс в одномерном массиве
+
+            if ((i == j + 1 or i == j - 1) and j != 0 and j != Nx - 1)
+            {
+                D[index] = coeff;  // выше или ниже главной диагонали
+            }
+            else if (i == j and j != 0 and j != Nx - 1)
+            {
+                D[index] = coeff2;   // на главной диагонали
+            }
+        }
     }
 }
+

@@ -1,5 +1,5 @@
 #pragma once
-void set_initial_conditions(__half* u, __half* v, __half* p, int Nx, int Ny)
+void set_initial_conditions(float* u, float* v, float* p, int Nx, int Ny)
 {
 	for (int i = 0; i < Nx; i++)
 	{
@@ -13,7 +13,7 @@ void set_initial_conditions(__half* u, __half* v, __half* p, int Nx, int Ny)
 	}
 }
 
-void set_boundary_conditions(__half* u, __half* v, int Nx, int Ny)
+void set_boundary_conditions(float* u, float* v, int Nx, int Ny)
 {
 	// установка скоростей на границах
 	for (int i = 0; i < Nx; i++)
@@ -49,7 +49,7 @@ void set_boundary_conditions(__half* u, __half* v, int Nx, int Ny)
 	u[(Nx - 1) * Ny + (Ny - 1)] = 0.0f;
 }
 
-void set_pressure_boundary_conditions(__half* p, int Nx, int Ny)
+void set_pressure_boundary_conditions(float* p, int Nx, int Ny)
 {
 	// установка давлений на границах
 	for (int i = 0; i < Nx; i++)
@@ -67,8 +67,8 @@ void set_pressure_boundary_conditions(__half* p, int Nx, int Ny)
 		p[index_right] = p[index_right - Ny];
 	}
 	// интерполяция давления на углах с отверстием
-	p[0] = (p[Ny] + p[1]) / __float2half(2.0f);
-	p[Ny - 1] = (p[Ny - 2] + p[2 * Ny - 1]) / __float2half(2.0f);
-	p[(Nx - 1) * Ny] = (p[(Nx - 1) * Ny + 1] + p[(Nx - 2) * Ny]) / __float2half(2.0f);
-	p[(Nx - 1) * Ny + Ny - 1] = (p[(Nx - 1) * Ny + Ny - 2] + p[(Nx - 2) * Ny + Ny - 1]) / __float2half(2.0f);
+	p[0] = (p[Ny] + p[1]) / 2.0f;
+	p[Ny - 1] = (p[Ny - 2] + p[2 * Ny - 1]) / 2.0f;
+	p[(Nx - 1) * Ny] = (p[(Nx - 1) * Ny + 1] + p[(Nx - 2) * Ny]) / 2.0f;
+	p[(Nx - 1) * Ny + Ny - 1] = (p[(Nx - 1) * Ny + Ny - 2] + p[(Nx - 2) * Ny + Ny - 1]) / 2.0f;
 }

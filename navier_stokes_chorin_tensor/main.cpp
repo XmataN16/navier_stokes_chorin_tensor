@@ -6,26 +6,27 @@
 #include <derivative_matrix.h>
 
 
-void allocate_2d_array_on_GPU(__half* u, __half* v, __half* u_prev, __half* v_prev, __half* p, __half* p_prev, __half*& D_x, __half*& D_y, __half*& D_xx, __half*& D_yy, int Nx, int Ny, __half dx, __half dy, __half dt, __half mu);
-void copy_GPU_to_host(__half* u, __half* v, int Nx, int Ny);
-void calc_advect(__half* u, __half* v, __half* u_prev, __half* v_prev, __half*& D_x, __half*& D_y, int Nx, int Ny);
+void allocate_2d_array_on_GPU(float* u, float* v, float* u_prev, float* v_prev, float* p, float* p_prev, float*& D_x, float*& D_y, float*& D_xx, float*& D_yy, int Nx, int Ny, float dx, float dy, float dt, float mu);
+void free_2d_array_on_GPU();
+void copy_GPU_to_host(float* u, float* v, int Nx, int Ny);
+void method_chorin_iteration(int Nx, int Ny, float dt, float mu);
 
-// ”становка глобальных параметров
+// Set global parameters
 const float Lx = 0.1f;      // длина расчетной области вдоль оси x в м
 const float Ly = 0.1f;      // длина расчетной области вдоль оси y в м
-const float T = 0.00001f;   // врем€ расчета в сек.
+const float T = 0.001f;   // врем€ расчета в сек.
 const int Nx = 10;          // количество узлов по оси x
 const int Ny = 10;          // количество узлов по оси y
 const int Nt = 10;          // количество узлов по временной оси
 const float rho = 1000.0f;  // плотность в кг/м^2
 const float mu = 1.0f;      // [Pa*s] // динамическа€ в€зкость
-const __half dx = Lx / (Nx - 1);
-const __half dy = Ly / (Ny - 1);
-const __half dt = T / (Nt - 1); // временной шаг в сек.
-const __half nu = mu / rho;     // кинематическа€ в€зкость
+const float dx = Lx / (Nx - 1);
+const float dy = Ly / (Ny - 1);
+const float dt = T / (Nt - 1); // временной шаг в сек.
+const float nu = mu / rho;     // кинематическа€ в€зкость
 
 // ‘ункци€ дл€ вывода матрицы в консоль
-void print_matrix(const __half* M, int Nx, int Ny)
+void print_matrix(const float* M, int Nx, int Ny)
 {
     std::cout << std::fixed << std::setprecision(3);
 
@@ -33,7 +34,7 @@ void print_matrix(const __half* M, int Nx, int Ny)
     {
         for (int j = 0; j < Ny; j++)
         {
-            std::cout << std::setw(8) << __half2float(M[(i * Nx) + j]) << " ";
+            std::cout << std::setw(8) << M[(i * Nx) + j] << " ";
         }
         std::cout << std::endl;
     }
@@ -42,26 +43,33 @@ void print_matrix(const __half* M, int Nx, int Ny)
 
 int main()
 {
-    __half* u, * v, * u_prev, * v_prev, * p, * p_prev, * D_x, * D_y, * D_xx, * D_yy;
+    float* u, * v, * u_prev, * v_prev, * p, * p_prev, * D_x, * D_y, * D_xx, * D_yy;
 
-    // ¬ыдел€ем пам€ть дл€ операторных матриц
+    // Allocate memory(HOST)
     allocate_2d_array(u, v, u_prev, v_prev, p, p_prev, D_x, D_y, D_xx, D_yy, Nx, Ny);
 
-    //начальные и граничные услови€
+    // Set start and boundary conditions
     set_initial_conditions(u, v, p, Nx, Ny);
     set_boundary_conditions(u, v, Nx, Ny);
     set_pressure_boundary_conditions(p, Nx, Ny);
 
-    // »нициализируем разностные операторы
+    // Init matrix diff operators
     createFirstDerivativeMatrix(D_x, Nx, dx);
     createFirstDerivativeMatrix(D_y, Ny, dy);
     createSecondDerivativeMatrix(D_xx, Nx, dx);
     createSecondDerivativeMatrix(D_yy, Ny, dy);
 
-    //вызов функции дл€ выделени€ пам€ти под массивы на device
+    // Allocate memory(DEVICE)
     allocate_2d_array_on_GPU(u, v, u_prev, v_prev, p, p_prev, D_x, D_y, D_xx, D_yy, Nx, Ny, dx, dy, dt, mu);
 
-    calc_advect(u, v, u_prev, v_prev, D_x, D_y, Nx, Ny);
+    method_chorin_iteration(Nx, Ny, dt, mu);
+    //calc_advect(Nx, Ny, dt);
+
+    copy_GPU_to_host(u, v, Nx, Ny);
+
+    free_2d_array_on_GPU();
+
+    print_matrix(u, Nx, Ny);
 
     return 0;
 }
